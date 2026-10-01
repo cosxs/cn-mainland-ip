@@ -1,0 +1,49 @@
+name: release
+
+on:
+  schedule:
+    - cron: "0 10 * * *" # the 08:00 UTC RIS snapshot is published by then
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+
+      # Rewrites release/ only when every pre-publish check passes.
+      - run: cargo run --release --locked
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: report
+          path: report/
+
+      - name: Publish to main and GitHub Releases
+        working-directory: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add --all .
+          git diff --cached --quiet && exit 0
+          manifest=../report/manifest.json
+          version=$(jq -r '.snapshot | fromdateiso8601 | strftime("%Y%m%d.%H%M")' "$manifest")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --quiet -m "chore(release): $version"
+          git pull --rebase --quiet origin main # main may have moved during the build
+          git push --quiet origin HEAD:main
+
+          # Release assets are flat: surge/cn.list is attached as surge.list.
+          mkdir ../assets
+          for file in */cn.*; do cp "$file" "../assets/${file%%/*}.${file##*.}"; done
+          gh release create "$version" ../assets/* --target "$(git rev-parse HEAD)" --title "$version" \
+            --notes "$(jq -r '"Snapshot \(.snapshot): \(.entries.v4) IPv4 and \(.entries.v6) IPv6 entries."' "$manifest")"

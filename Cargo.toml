@@ -1,0 +1,39 @@
+[package]
+name = "cn-mainland-ip"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Mainland China IP ranges derived from BGP routing data"
+repository = "https://github.com/cosxs/cn-mainland-ip"
+license = "MIT"
+publish = false
+
+[dependencies]
+anyhow = "1"
+bgpkit-parser = "0.22"
+flate2 = { version = "1.1", default-features = false, features = ["zlib-rs"] }
+ipnet = { version = "2.10", features = ["serde"] }
+jiff = { version = "0.2", features = ["serde"] }
+oneio = { version = "0.26", default-features = false, features = ["https", "gz", "bz", "xz"] }
+rayon = "1"
+ruzstd = "0.9"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+insta = "1"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+missing_errors_doc = "allow"
+must_use_candidate = "allow"
+
+[profile.release]
+lto = "thin"

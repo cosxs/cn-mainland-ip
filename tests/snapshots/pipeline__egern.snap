@@ -1,0 +1,20 @@
+---
+source: tests/pipeline.rs
+expression: text(EGERN)
+---
+# cn-mainland-ip: mainland China IP ranges derived from BGP routing data
+# snapshot 2026-09-30T08:00:00Z from 1 collectors; NRO 2026-09-29; RPKI -
+# 10 IPv4 and 1 IPv6 entries; license MIT
+ip_cidr_set:
+  - '1.0.0.0/17'
+  - '1.0.129.0/24'
+  - '1.0.130.0/23'
+  - '1.0.132.0/22'
+  - '1.0.136.0/21'
+  - '1.0.144.0/20'
+  - '1.0.160.0/19'
+  - '1.0.192.0/18'
+  - '8.128.0.0/16'
+  - '42.0.0.0/16'
+ip_cidr6_set:
+  - '240e::/20'
