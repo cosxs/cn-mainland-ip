@@ -1,6 +1,6 @@
 # cn-mainland-ip: mainland China IP ranges derived from BGP routing data
-# snapshot 2026-10-02T08:00:00Z from 14 collectors; NRO 2026-10-01; RPKI 2026-10-01
-# 6269 IPv4 and 3519 IPv6 entries; license MIT
+# snapshot 2026-10-03T08:00:00Z from 14 collectors; NRO 2026-10-02; RPKI 2026-10-02
+# 6271 IPv4 and 3523 IPv6 entries; license MIT
 ip-cidr, 1.0.1.0/24, direct
 ip-cidr, 1.0.2.0/23, direct
 ip-cidr, 1.0.8.0/21, direct
@@ -1691,7 +1691,10 @@ ip-cidr, 103.72.233.0/24, direct
 ip-cidr, 103.72.234.0/23, direct
 ip-cidr, 103.72.236.0/22, direct
 ip-cidr, 103.72.240.0/20, direct
-ip-cidr, 103.73.0.0/19, direct
+ip-cidr, 103.73.0.0/21, direct
+ip-cidr, 103.73.10.0/23, direct
+ip-cidr, 103.73.12.0/22, direct
+ip-cidr, 103.73.16.0/20, direct
 ip-cidr, 103.73.48.0/22, direct
 ip-cidr, 103.73.116.0/22, direct
 ip-cidr, 103.73.120.0/22, direct
@@ -3369,7 +3372,6 @@ ip-cidr, 117.128.0.0/14, direct
 ip-cidr, 117.132.0.0/15, direct
 ip-cidr, 117.134.0.0/17, direct
 ip-cidr, 117.134.128.0/18, direct
-ip-cidr, 117.134.207.0/24, direct
 ip-cidr, 117.134.208.0/23, direct
 ip-cidr, 117.134.212.0/23, direct
 ip-cidr, 117.134.216.0/22, direct
@@ -9683,7 +9685,11 @@ ip6-cidr, 2a0a:d684::/32, direct
 ip6-cidr, 2a0a:d685::/40, direct
 ip6-cidr, 2a0a:d685:100::/41, direct
 ip6-cidr, 2a0a:d685:180::/42, direct
-ip6-cidr, 2a0a:d685:1c0::/43, direct
+ip6-cidr, 2a0a:d685:1c0::/44, direct
+ip6-cidr, 2a0a:d685:1d1::/48, direct
+ip6-cidr, 2a0a:d685:1d2::/47, direct
+ip6-cidr, 2a0a:d685:1d4::/46, direct
+ip6-cidr, 2a0a:d685:1d8::/45, direct
 ip6-cidr, 2a0a:d685:1e2::/47, direct
 ip6-cidr, 2a0a:d685:1e4::/46, direct
 ip6-cidr, 2a0a:d685:1e8::/45, direct
