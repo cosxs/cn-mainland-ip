@@ -1,6 +1,6 @@
 # cn-mainland-ip: mainland China IP ranges derived from BGP routing data
-# snapshot 2026-10-04T08:00:00Z from 14 collectors; NRO 2026-10-03; RPKI 2026-10-03
-# 6272 IPv4 and 3523 IPv6 entries; license MIT
+# snapshot 2026-10-06T08:00:00Z from 14 collectors; NRO 2026-10-05; RPKI 2026-10-05
+# 6277 IPv4 and 3522 IPv6 entries; license MIT
 ip-cidr, 1.0.1.0/24, direct
 ip-cidr, 1.0.2.0/23, direct
 ip-cidr, 1.0.8.0/21, direct
@@ -362,6 +362,7 @@ ip-cidr, 43.225.76.0/22, direct
 ip-cidr, 43.225.84.0/23, direct
 ip-cidr, 43.225.86.0/24, direct
 ip-cidr, 43.225.120.0/22, direct
+ip-cidr, 43.225.175.0/24, direct
 ip-cidr, 43.225.180.0/22, direct
 ip-cidr, 43.225.208.0/22, direct
 ip-cidr, 43.225.216.0/21, direct
@@ -1665,6 +1666,7 @@ ip-cidr, 103.70.8.0/22, direct
 ip-cidr, 103.70.14.0/23, direct
 ip-cidr, 103.70.148.0/22, direct
 ip-cidr, 103.70.224.0/23, direct
+ip-cidr, 103.70.227.0/24, direct
 ip-cidr, 103.70.236.0/22, direct
 ip-cidr, 103.70.252.0/22, direct
 ip-cidr, 103.71.0.0/22, direct
@@ -1772,6 +1774,7 @@ ip-cidr, 103.81.96.0/22, direct
 ip-cidr, 103.81.120.0/22, direct
 ip-cidr, 103.81.148.0/22, direct
 ip-cidr, 103.81.164.0/22, direct
+ip-cidr, 103.81.184.0/23, direct
 ip-cidr, 103.81.200.0/22, direct
 ip-cidr, 103.81.232.0/22, direct
 ip-cidr, 103.82.60.0/22, direct
@@ -1918,6 +1921,7 @@ ip-cidr, 103.97.112.0/21, direct
 ip-cidr, 103.97.144.0/21, direct
 ip-cidr, 103.97.188.0/22, direct
 ip-cidr, 103.97.192.0/22, direct
+ip-cidr, 103.97.229.0/24, direct
 ip-cidr, 103.98.0.0/23, direct
 ip-cidr, 103.98.40.0/21, direct
 ip-cidr, 103.98.48.0/22, direct
@@ -2228,6 +2232,7 @@ ip-cidr, 103.143.124.0/23, direct
 ip-cidr, 103.143.132.0/22, direct
 ip-cidr, 103.143.174.0/23, direct
 ip-cidr, 103.143.228.0/23, direct
+ip-cidr, 103.144.41.0/24, direct
 ip-cidr, 103.144.66.0/23, direct
 ip-cidr, 103.144.70.0/23, direct
 ip-cidr, 103.144.72.0/23, direct
@@ -2380,6 +2385,7 @@ ip-cidr, 103.176.52.0/23, direct
 ip-cidr, 103.176.222.0/23, direct
 ip-cidr, 103.176.244.0/23, direct
 ip-cidr, 103.177.28.0/23, direct
+ip-cidr, 103.177.44.0/23, direct
 ip-cidr, 103.177.71.0/24, direct
 ip-cidr, 103.177.162.0/23, direct
 ip-cidr, 103.178.240.0/23, direct
@@ -2784,6 +2790,7 @@ ip-cidr, 103.238.20.0/22, direct
 ip-cidr, 103.238.24.0/21, direct
 ip-cidr, 103.238.32.0/21, direct
 ip-cidr, 103.238.40.0/22, direct
+ip-cidr, 103.238.46.0/23, direct
 ip-cidr, 103.238.48.0/21, direct
 ip-cidr, 103.238.56.0/22, direct
 ip-cidr, 103.238.88.0/21, direct
@@ -3769,9 +3776,7 @@ ip-cidr, 123.96.0.0/15, direct
 ip-cidr, 123.98.0.0/21, direct
 ip-cidr, 123.98.12.0/22, direct
 ip-cidr, 123.98.24.0/21, direct
-ip-cidr, 123.98.32.0/22, direct
-ip-cidr, 123.98.40.0/21, direct
-ip-cidr, 123.98.48.0/20, direct
+ip-cidr, 123.98.32.0/19, direct
 ip-cidr, 123.98.64.0/18, direct
 ip-cidr, 123.99.128.0/19, direct
 ip-cidr, 123.99.160.0/22, direct
@@ -4279,6 +4284,7 @@ ip-cidr, 163.223.28.0/23, direct
 ip-cidr, 163.223.32.0/23, direct
 ip-cidr, 163.223.72.0/23, direct
 ip-cidr, 163.223.124.0/23, direct
+ip-cidr, 163.223.217.0/24, direct
 ip-cidr, 163.223.222.0/23, direct
 ip-cidr, 163.227.34.0/23, direct
 ip-cidr, 163.227.40.0/23, direct
@@ -4456,9 +4462,7 @@ ip-cidr, 183.182.11.0/24, direct
 ip-cidr, 183.182.12.0/22, direct
 ip-cidr, 183.182.16.0/23, direct
 ip-cidr, 183.182.23.0/24, direct
-ip-cidr, 183.182.24.0/23, direct
-ip-cidr, 183.182.26.0/24, direct
-ip-cidr, 183.182.28.0/22, direct
+ip-cidr, 183.182.24.0/21, direct
 ip-cidr, 183.184.0.0/13, direct
 ip-cidr, 183.192.0.0/11, direct
 ip-cidr, 183.224.0.0/12, direct
@@ -4479,6 +4483,8 @@ ip-cidr, 183.255.224.0/21, direct
 ip-cidr, 183.255.232.0/23, direct
 ip-cidr, 183.255.238.0/23, direct
 ip-cidr, 183.255.240.0/20, direct
+ip-cidr, 185.2.48.0/24, direct
+ip-cidr, 185.192.56.0/22, direct
 ip-cidr, 188.131.128.0/17, direct
 ip-cidr, 192.51.172.0/23, direct
 ip-cidr, 192.55.46.0/23, direct
@@ -4835,9 +4841,7 @@ ip-cidr, 202.130.0.0/19, direct
 ip-cidr, 202.130.39.0/24, direct
 ip-cidr, 202.130.224.0/19, direct
 ip-cidr, 202.131.16.0/21, direct
-ip-cidr, 202.131.48.0/22, direct
-ip-cidr, 202.131.54.0/23, direct
-ip-cidr, 202.131.56.0/21, direct
+ip-cidr, 202.131.48.0/20, direct
 ip-cidr, 202.131.208.0/20, direct
 ip-cidr, 202.133.32.0/20, direct
 ip-cidr, 202.134.58.0/24, direct
@@ -4860,6 +4864,8 @@ ip-cidr, 202.143.32.0/20, direct
 ip-cidr, 202.143.56.0/21, direct
 ip-cidr, 202.143.100.0/22, direct
 ip-cidr, 202.143.104.0/22, direct
+ip-cidr, 202.144.196.0/23, direct
+ip-cidr, 202.144.198.0/24, direct
 ip-cidr, 202.146.160.0/20, direct
 ip-cidr, 202.146.184.0/23, direct
 ip-cidr, 202.146.186.0/24, direct
@@ -6051,8 +6057,7 @@ ip-cidr, 211.152.0.0/17, direct
 ip-cidr, 211.152.128.0/20, direct
 ip-cidr, 211.152.144.0/22, direct
 ip-cidr, 211.152.150.0/23, direct
-ip-cidr, 211.152.152.0/22, direct
-ip-cidr, 211.152.156.0/23, direct
+ip-cidr, 211.152.152.0/21, direct
 ip-cidr, 211.152.160.0/19, direct
 ip-cidr, 211.152.192.0/18, direct
 ip-cidr, 211.153.0.0/16, direct
@@ -8614,7 +8619,6 @@ ip6-cidr, 2406:840:9880::/41, direct
 ip6-cidr, 2406:840:9900::/42, direct
 ip6-cidr, 2406:840:9940::/43, direct
 ip6-cidr, 2406:840:9960::/47, direct
-ip6-cidr, 2406:840:9963::/48, direct
 ip6-cidr, 2406:840:9965::/48, direct
 ip6-cidr, 2406:840:9968::/46, direct
 ip6-cidr, 2406:840:996d::/48, direct
