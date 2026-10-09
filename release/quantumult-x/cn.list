@@ -1,6 +1,6 @@
 # cn-mainland-ip: mainland China IP ranges derived from BGP routing data
-# snapshot 2026-10-08T08:00:00Z from 14 collectors; NRO 2026-10-07; RPKI 2026-10-07
-# 6246 IPv4 and 3527 IPv6 entries; license MIT
+# snapshot 2026-10-09T08:00:00Z from 14 collectors; NRO 2026-10-08; RPKI 2026-10-08
+# 6246 IPv4 and 3528 IPv6 entries; license MIT
 ip-cidr, 1.0.1.0/24, direct
 ip-cidr, 1.0.2.0/23, direct
 ip-cidr, 1.0.8.0/21, direct
@@ -2522,7 +2522,7 @@ ip-cidr, 103.205.188.0/22, direct
 ip-cidr, 103.205.192.0/21, direct
 ip-cidr, 103.205.200.0/22, direct
 ip-cidr, 103.205.236.0/22, direct
-ip-cidr, 103.205.248.0/21, direct
+ip-cidr, 103.205.248.0/22, direct
 ip-cidr, 103.206.0.0/22, direct
 ip-cidr, 103.206.44.0/22, direct
 ip-cidr, 103.206.148.0/22, direct
@@ -3650,8 +3650,7 @@ ip-cidr, 122.8.63.0/24, direct
 ip-cidr, 122.8.68.0/22, direct
 ip-cidr, 122.8.76.0/22, direct
 ip-cidr, 122.8.80.0/23, direct
-ip-cidr, 122.8.112.0/21, direct
-ip-cidr, 122.8.124.0/22, direct
+ip-cidr, 122.8.116.0/22, direct
 ip-cidr, 122.8.192.0/18, direct
 ip-cidr, 122.9.0.0/16, direct
 ip-cidr, 122.10.129.0/24, direct
@@ -6041,7 +6040,8 @@ ip-cidr, 211.155.66.0/23, direct
 ip-cidr, 211.155.68.0/22, direct
 ip-cidr, 211.155.72.0/21, direct
 ip-cidr, 211.155.80.0/20, direct
-ip-cidr, 211.155.96.0/20, direct
+ip-cidr, 211.155.100.0/22, direct
+ip-cidr, 211.155.104.0/21, direct
 ip-cidr, 211.155.112.0/23, direct
 ip-cidr, 211.155.114.0/24, direct
 ip-cidr, 211.155.116.0/22, direct
@@ -8550,6 +8550,7 @@ ip6-cidr, 2406:840:9101::/48, direct
 ip6-cidr, 2406:840:9103::/48, direct
 ip6-cidr, 2406:840:9104::/46, direct
 ip6-cidr, 2406:840:9108::/45, direct
+ip6-cidr, 2406:840:9111::/48, direct
 ip6-cidr, 2406:840:9112::/47, direct
 ip6-cidr, 2406:840:9114::/46, direct
 ip6-cidr, 2406:840:9118::/45, direct
