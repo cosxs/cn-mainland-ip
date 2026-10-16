@@ -46,11 +46,11 @@ impl Inputs {
     pub fn fetch(snapshot: Timestamp, fetcher: &Fetcher) -> Result<Self> {
         let nro = fetch::nro_url(snapshot);
         let registry =
-            Registry::parse(BufReader::new(fetcher.open(&nro)?)).with_context(|| format!("NRO {nro}"))?;
+            fetch::retry(&nro, || Registry::parse(BufReader::new(fetcher.open(&nro)?))).context("NRO")?;
         let dumps = fetch::rpki_urls(snapshot)
             .iter()
             .map(|(_, url)| {
-                Dump::parse(BufReader::new(fetcher.open(url)?)).with_context(|| format!("RPKI {url}"))
+                fetch::retry(url, || Dump::parse(BufReader::new(fetcher.open(url)?))).context("RPKI")
             })
             .collect::<Result<Vec<_>>>()?;
         let roas = Roas::from_dumps(dumps)?;
@@ -100,8 +100,8 @@ pub fn build(snapshot: Timestamp, fetcher: &Fetcher) -> Result<Build> {
 fn observe(index: usize, collector: &Collector, inputs: &Inputs, fetcher: &Fetcher) -> Result<Observations> {
     let url = fetch::rib_url(collector, inputs.snapshot);
     let started = Instant::now();
-    let observations = rib::observe(fetcher.open(&url)?, index, &inputs.registry)
-        .with_context(|| format!("collector {}: {url}", collector.name))?;
+    let observations = fetch::retry(&url, || rib::observe(fetcher.open(&url)?, index, &inputs.registry))
+        .with_context(|| format!("collector {}", collector.name))?;
     let secs = started.elapsed().as_secs();
     info!(collector = collector.name, routes = observations.routes.len(), secs, "RIB parsed");
     Ok(observations)

@@ -21,7 +21,9 @@
 
 同一客户端的二进制和文本规则集内容相同，二进制的体积更小、加载更快。
 
-每次更新也会在 [Releases](https://github.com/cosxs/cn-mainland-ip/releases) 发布一份，版本号是数据快照的时间（如 `20261001.0800`，UTC），文件以目录名命名，例如 `surge/cn.list` 对应 `https://github.com/cosxs/cn-mainland-ip/releases/latest/download/surge.list`。
+上面每个文件旁边还有只含 IPv4 和只含 IPv6 的两份，文件名分别加 `-ipv4`、`-ipv6`，格式不变，例如 `surge/cn-ipv4.list`、`mihomo/cn-ipv6.mrs`、`text/cn-ipv4.txt`。把下面配置里的 `cn.` 换成 `cn-ipv4.` 或 `cn-ipv6.` 即可。
+
+每次更新也会在 [Releases](https://github.com/cosxs/cn-mainland-ip/releases) 发布一份，版本号是数据快照的时间（如 `20261001.0800`，UTC），文件以目录名命名，例如 `surge/cn.list` 对应 `https://github.com/cosxs/cn-mainland-ip/releases/latest/download/surge.list`，`surge/cn-ipv4.list` 对应 `surge-ipv4.list`。
 
 规则都放在域名规则之后、兜底规则之前。规则集里不写 `no-resolve`，由你在规则那一行决定。
 

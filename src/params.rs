@@ -64,6 +64,11 @@ pub const SNAPSHOT_INTERVAL: SignedDuration = SignedDuration::from_hours(8);
 /// Time for a snapshot to be completely published to every archive.
 pub const SNAPSHOT_DELAY: SignedDuration = SignedDuration::from_hours(2);
 
+/// Downloads are tried this many times, waiting `RETRY_DELAY` times the attempt number in between:
+/// archives occasionally drop a connection, and one missing collector blocks the whole release.
+pub const DOWNLOAD_ATTEMPTS: u32 = 3;
+pub const RETRY_DELAY: std::time::Duration = std::time::Duration::from_secs(30);
+
 /// Freshness limits relative to the snapshot.
 pub const MAX_AGE_NRO: SignedDuration = SignedDuration::from_hours(72);
 pub const MAX_AGE_RPKI: SignedDuration = SignedDuration::from_hours(48);

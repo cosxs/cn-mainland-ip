@@ -3,13 +3,15 @@
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::thread;
+use std::time::Duration;
 
 use anyhow::{Context, Result, ensure};
 use jiff::{SignedDuration, Timestamp};
 
 use crate::params::{
-    Collector, NRO_ARCHIVE, Project, RIS_ARCHIVE, ROUTEVIEWS_ARCHIVE, RPKI_ARCHIVE, RPKI_TALS,
-    SNAPSHOT_DELAY, SNAPSHOT_INTERVAL,
+    Collector, DOWNLOAD_ATTEMPTS, NRO_ARCHIVE, Project, RETRY_DELAY, RIS_ARCHIVE, ROUTEVIEWS_ARCHIVE,
+    RPKI_ARCHIVE, RPKI_TALS, SNAPSHOT_DELAY, SNAPSHOT_INTERVAL,
 };
 
 /// Opens URLs, decompressing by file extension.
@@ -39,6 +41,25 @@ impl Fetcher {
         }
         Ok(oneio::get_reader(utf8(&path)?)?)
     }
+}
+
+/// Runs `read` until it succeeds, at most `DOWNLOAD_ATTEMPTS` times. `read` must open `url` itself,
+/// so that a stream that broke half way is downloaded again from the start.
+pub fn retry<T>(url: &str, read: impl FnMut() -> Result<T>) -> Result<T> {
+    retry_after(RETRY_DELAY, url, read)
+}
+
+fn retry_after<T>(delay: Duration, url: &str, mut read: impl FnMut() -> Result<T>) -> Result<T> {
+    for attempt in 1.. {
+        match read() {
+            Err(e) if attempt < DOWNLOAD_ATTEMPTS => {
+                tracing::warn!(url, attempt, "retrying: {e:#}");
+                thread::sleep(delay * attempt);
+            }
+            result => return result.with_context(|| format!("{url} (attempt {attempt})")),
+        }
+    }
+    unreachable!("the last attempt returns")
 }
 
 fn utf8(path: &Path) -> Result<&str> {
@@ -101,6 +122,31 @@ mod tests {
         assert_eq!(latest_snapshot(at("2026-09-30T09:59Z")).unwrap(), at("2026-09-30T00:00Z"));
         assert!(check_snapshot(at("2026-09-30T16:00Z")).is_ok());
         assert!(check_snapshot(at("2026-09-30T12:00Z")).is_err());
+    }
+
+    #[test]
+    fn retry_until_success_or_the_last_attempt() {
+        let mut calls = 0;
+        assert_eq!(
+            retry_after(Duration::ZERO, "u", || {
+                calls += 1;
+                if calls < 2 {
+                    anyhow::bail!("drop")
+                }
+                Ok(calls)
+            })
+            .unwrap(),
+            2
+        );
+        calls = 0;
+        assert!(
+            retry_after::<()>(Duration::ZERO, "u", || {
+                calls += 1;
+                anyhow::bail!("down")
+            })
+            .is_err()
+        );
+        assert_eq!(calls, DOWNLOAD_ATTEMPTS);
     }
 
     #[test]
