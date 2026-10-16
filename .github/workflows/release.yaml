@@ -42,8 +42,9 @@ jobs:
           git pull --rebase --quiet origin main # main may have moved during the build
           git push --quiet origin HEAD:main
 
-          # Release assets are flat: surge/cn.list is attached as surge.list.
+          # Release assets are flat: surge/cn.list is attached as surge.list,
+          # text/cn-ipv4.txt as text-ipv4.txt.
           mkdir ../assets
-          for file in */cn.*; do cp "$file" "../assets/${file%%/*}.${file##*.}"; done
+          for file in */cn*.*; do name=${file#*/}; cp "$file" "../assets/${file%%/*}${name#cn}"; done
           gh release create "$version" ../assets/* --target "$(git rev-parse HEAD)" --title "$version" \
             --notes "$(jq -r '"Snapshot \(.snapshot): \(.entries.v4) IPv4 and \(.entries.v6) IPv6 entries."' "$manifest")"

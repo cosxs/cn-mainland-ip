@@ -18,10 +18,12 @@
 | `sing-box/cn.json` | sing-box 源格式规则集（`format: source`） |
 | `egern/cn.yaml` | Egern 规则集（`ip_cidr_set` / `ip_cidr6_set`） |
 | `text/cn.txt` | 纯 CIDR 列表，每行一个，先 IPv4 后 IPv6 |
+| `text/cn-ipv4.txt` | 纯 CIDR 列表，只含 IPv4 |
+| `text/cn-ipv6.txt` | 纯 CIDR 列表，只含 IPv6 |
 
 同一客户端的二进制和文本规则集内容相同，二进制的体积更小、加载更快。
 
-每次更新也会在 [Releases](https://github.com/cosxs/cn-mainland-ip/releases) 发布一份，版本号是数据快照的时间（如 `20261001.0800`，UTC），文件以目录名命名，例如 `surge/cn.list` 对应 `https://github.com/cosxs/cn-mainland-ip/releases/latest/download/surge.list`。
+每次更新也会在 [Releases](https://github.com/cosxs/cn-mainland-ip/releases) 发布一份，版本号是数据快照的时间（如 `20261001.0800`，UTC），文件以目录名命名，例如 `surge/cn.list` 对应 `https://github.com/cosxs/cn-mainland-ip/releases/latest/download/surge.list`，`text/cn-ipv4.txt` 对应 `text-ipv4.txt`。
 
 规则都放在域名规则之后、兜底规则之前。规则集里不写 `no-resolve`，由你在规则那一行决定。
 

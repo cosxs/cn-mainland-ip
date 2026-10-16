@@ -23,6 +23,10 @@ use crate::ranges::{self, Range};
 
 /// Plain CIDR list, IPv4 first.
 pub const TEXT: &str = "text/cn.txt";
+/// The IPv4 half of `TEXT`.
+pub const TEXT_V4: &str = "text/cn-ipv4.txt";
+/// The IPv6 half of `TEXT`.
+pub const TEXT_V6: &str = "text/cn-ipv6.txt";
 pub const SURGE: &str = "surge/cn.list";
 /// Loon reads Surge's format for its remote rules.
 pub const LOON: &str = "loon/cn.list";
@@ -65,6 +69,8 @@ pub fn render(included: &PerFamily<Vec<Range>>, header: &Header) -> Result<Artif
     Ok(Artifacts {
         files: vec![
             (TEXT, lines(nets.v4.iter().chain(&nets.v6), "", "").into()),
+            (TEXT_V4, lines(&nets.v4, "", "").into()),
+            (TEXT_V6, lines(&nets.v6, "", "").into()),
             (SURGE, surge.clone().into()),
             (LOON, surge.into()),
             (SHADOWROCKET, shadowrocket::render(&banner, &nets).into()),

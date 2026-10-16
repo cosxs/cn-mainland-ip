@@ -6,7 +6,8 @@ use std::io::Cursor;
 use bgpkit_parser::encoder::MrtRibEncoder;
 use bgpkit_parser::models::{AsPath, BgpElem, ElemType};
 use cn_mainland_ip::export::{
-    self, EGERN, Header, LOON, MIHOMO_YAML, QUANTUMULT_X, SHADOWROCKET, SING_BOX_JSON, SURGE,
+    self, EGERN, Header, LOON, MIHOMO_YAML, QUANTUMULT_X, SHADOWROCKET, SING_BOX_JSON, SURGE, TEXT, TEXT_V4,
+    TEXT_V6,
 };
 use cn_mainland_ip::model::Asn;
 use cn_mainland_ip::nro::Registry;
@@ -89,4 +90,7 @@ fn routing_cases() {
     insta::assert_snapshot!("mihomo", text(MIHOMO_YAML));
     insta::assert_snapshot!("sing-box", text(SING_BOX_JSON));
     insta::assert_snapshot!("egern", text(EGERN));
+    assert!(text(TEXT_V4).lines().all(|line| !line.contains(':')));
+    assert!(text(TEXT_V6).lines().all(|line| line.contains(':')));
+    assert_eq!(format!("{}{}", text(TEXT_V4), text(TEXT_V6)), text(TEXT));
 }
