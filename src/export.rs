@@ -23,10 +23,6 @@ use crate::ranges::{self, Range};
 
 /// Plain CIDR list, IPv4 first.
 pub const TEXT: &str = "text/cn.txt";
-/// The IPv4 half of `TEXT`.
-pub const TEXT_V4: &str = "text/cn-ipv4.txt";
-/// The IPv6 half of `TEXT`.
-pub const TEXT_V6: &str = "text/cn-ipv6.txt";
 pub const SURGE: &str = "surge/cn.list";
 /// Loon reads Surge's format for its remote rules.
 pub const LOON: &str = "loon/cn.list";
@@ -37,6 +33,63 @@ pub const MIHOMO_MRS: &str = "mihomo/cn.mrs";
 pub const SING_BOX_JSON: &str = "sing-box/cn.json";
 pub const SING_BOX_SRS: &str = "sing-box/cn.srs";
 pub const EGERN: &str = "egern/cn.yaml";
+
+/// Paths of one complete set of files, one per format.
+#[derive(Clone, Copy, Debug)]
+pub struct Layout {
+    pub text: &'static str,
+    pub surge: &'static str,
+    pub loon: &'static str,
+    pub shadowrocket: &'static str,
+    pub quantumult_x: &'static str,
+    pub mihomo_yaml: &'static str,
+    pub mihomo_mrs: &'static str,
+    pub sing_box_json: &'static str,
+    pub sing_box_srs: &'static str,
+    pub egern: &'static str,
+}
+
+/// Both families.
+pub const ALL: Layout = Layout {
+    text: TEXT,
+    surge: SURGE,
+    loon: LOON,
+    shadowrocket: SHADOWROCKET,
+    quantumult_x: QUANTUMULT_X,
+    mihomo_yaml: MIHOMO_YAML,
+    mihomo_mrs: MIHOMO_MRS,
+    sing_box_json: SING_BOX_JSON,
+    sing_box_srs: SING_BOX_SRS,
+    egern: EGERN,
+};
+
+/// IPv4 only, next to each file of [`ALL`] with `-ipv4` added to its name.
+pub const V4: Layout = Layout {
+    text: "text/cn-ipv4.txt",
+    surge: "surge/cn-ipv4.list",
+    loon: "loon/cn-ipv4.list",
+    shadowrocket: "shadowrocket/cn-ipv4.list",
+    quantumult_x: "quantumult-x/cn-ipv4.list",
+    mihomo_yaml: "mihomo/cn-ipv4.yaml",
+    mihomo_mrs: "mihomo/cn-ipv4.mrs",
+    sing_box_json: "sing-box/cn-ipv4.json",
+    sing_box_srs: "sing-box/cn-ipv4.srs",
+    egern: "egern/cn-ipv4.yaml",
+};
+
+/// IPv6 only, named like [`V4`].
+pub const V6: Layout = Layout {
+    text: "text/cn-ipv6.txt",
+    surge: "surge/cn-ipv6.list",
+    loon: "loon/cn-ipv6.list",
+    shadowrocket: "shadowrocket/cn-ipv6.list",
+    quantumult_x: "quantumult-x/cn-ipv6.list",
+    mihomo_yaml: "mihomo/cn-ipv6.yaml",
+    mihomo_mrs: "mihomo/cn-ipv6.mrs",
+    sing_box_json: "sing-box/cn-ipv6.json",
+    sing_box_srs: "sing-box/cn-ipv6.srs",
+    egern: "egern/cn-ipv6.yaml",
+};
 
 /// Where the data came from, for the file header.
 #[derive(Clone, Copy, Debug)]
@@ -61,28 +114,42 @@ impl Artifacts {
 }
 
 pub fn render(included: &PerFamily<Vec<Range>>, header: &Header) -> Result<Artifacts> {
+    let only =
+        |family: Family| PerFamily::from_fn(|f| if f == family { included[f].clone() } else { Vec::new() });
+    let mut files = render_set(included, header, &ALL)?;
+    files.extend(render_set(&only(Family::V4), header, &V4)?);
+    files.extend(render_set(&only(Family::V6), header, &V6)?);
+    Ok(Artifacts {
+        files,
+        entries: PerFamily::from_fn(|family| {
+            included[family].iter().map(|range| ranges::cidrs(range, family).len()).sum()
+        }),
+    })
+}
+
+/// Every format for the ranges in `included`, at the paths in `layout`.
+fn render_set(
+    included: &PerFamily<Vec<Range>>,
+    header: &Header,
+    layout: &Layout,
+) -> Result<Vec<(&'static str, Vec<u8>)>> {
     let nets: PerFamily<Vec<IpNet>> = PerFamily::from_fn(|family| {
         included[family].iter().flat_map(|range| ranges::cidrs(range, family)).collect()
     });
     let banner = header.banner(&nets);
     let surge = surge::render(&banner, &nets);
-    Ok(Artifacts {
-        files: vec![
-            (TEXT, lines(nets.v4.iter().chain(&nets.v6), "", "").into()),
-            (TEXT_V4, lines(&nets.v4, "", "").into()),
-            (TEXT_V6, lines(&nets.v6, "", "").into()),
-            (SURGE, surge.clone().into()),
-            (LOON, surge.into()),
-            (SHADOWROCKET, shadowrocket::render(&banner, &nets).into()),
-            (QUANTUMULT_X, quantumult_x::render(&banner, &nets).into()),
-            (MIHOMO_YAML, mihomo::yaml(&banner, &nets).into()),
-            (MIHOMO_MRS, mihomo::mrs(included, &nets)),
-            (SING_BOX_JSON, sing_box::source(&nets)?.into()),
-            (SING_BOX_SRS, sing_box::binary(included)?),
-            (EGERN, egern::render(&banner, &nets).into()),
-        ],
-        entries: PerFamily::from_fn(|family| nets[family].len()),
-    })
+    Ok(vec![
+        (layout.text, lines(nets.v4.iter().chain(&nets.v6), "", "").into()),
+        (layout.surge, surge.clone().into()),
+        (layout.loon, surge.into()),
+        (layout.shadowrocket, shadowrocket::render(&banner, &nets).into()),
+        (layout.quantumult_x, quantumult_x::render(&banner, &nets).into()),
+        (layout.mihomo_yaml, mihomo::yaml(&banner, &nets).into()),
+        (layout.mihomo_mrs, mihomo::mrs(included, &nets)),
+        (layout.sing_box_json, sing_box::source(&nets)?.into()),
+        (layout.sing_box_srs, sing_box::binary(included)?),
+        (layout.egern, egern::render(&banner, &nets).into()),
+    ])
 }
 
 impl Header {

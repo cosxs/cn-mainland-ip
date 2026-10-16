@@ -43,7 +43,7 @@ jobs:
           git push --quiet origin HEAD:main
 
           # Release assets are flat: surge/cn.list is attached as surge.list,
-          # text/cn-ipv4.txt as text-ipv4.txt.
+          # surge/cn-ipv4.list as surge-ipv4.list.
           mkdir ../assets
           for file in */cn*.*; do name=${file#*/}; cp "$file" "../assets/${file%%/*}${name#cn}"; done
           gh release create "$version" ../assets/* --target "$(git rev-parse HEAD)" --title "$version" \

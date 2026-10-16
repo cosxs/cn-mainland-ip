@@ -6,8 +6,7 @@ use std::io::Cursor;
 use bgpkit_parser::encoder::MrtRibEncoder;
 use bgpkit_parser::models::{AsPath, BgpElem, ElemType};
 use cn_mainland_ip::export::{
-    self, EGERN, Header, LOON, MIHOMO_YAML, QUANTUMULT_X, SHADOWROCKET, SING_BOX_JSON, SURGE, TEXT, TEXT_V4,
-    TEXT_V6,
+    self, ALL, EGERN, Header, LOON, MIHOMO_YAML, QUANTUMULT_X, SHADOWROCKET, SING_BOX_JSON, SURGE, V4, V6,
 };
 use cn_mainland_ip::model::Asn;
 use cn_mainland_ip::nro::Registry;
@@ -90,7 +89,21 @@ fn routing_cases() {
     insta::assert_snapshot!("mihomo", text(MIHOMO_YAML));
     insta::assert_snapshot!("sing-box", text(SING_BOX_JSON));
     insta::assert_snapshot!("egern", text(EGERN));
-    assert!(text(TEXT_V4).lines().all(|line| !line.contains(':')));
-    assert!(text(TEXT_V6).lines().all(|line| line.contains(':')));
-    assert_eq!(format!("{}{}", text(TEXT_V4), text(TEXT_V6)), text(TEXT));
+    insta::assert_snapshot!("egern-ipv4", text(V4.egern));
+    insta::assert_snapshot!("egern-ipv6", text(V6.egern));
+    assert_eq!(format!("{}{}", text(V4.text), text(V6.text)), text(ALL.text));
+    // Every single-family file is the full file with the other family's entries left out.
+    for (layout, other) in [(&V4, &V6), (&V6, &V4)] {
+        let full = [ALL.surge, ALL.shadowrocket, ALL.quantumult_x, ALL.mihomo_yaml, ALL.text];
+        let part = [layout.surge, layout.shadowrocket, layout.quantumult_x, layout.mihomo_yaml, layout.text];
+        let gone = [other.surge, other.shadowrocket, other.quantumult_x, other.mihomo_yaml, other.text];
+        for ((full, part), gone) in full.into_iter().zip(part).zip(gone) {
+            let body = |path| text(path).lines().filter(|l| !l.starts_with('#')).collect::<Vec<_>>();
+            let expected: Vec<_> =
+                body(full).into_iter().filter(|l| !l.contains('/') || !body(gone).contains(l)).collect();
+            assert_eq!(body(part), expected, "{part}");
+        }
+    }
+    assert_eq!(text(V4.loon), text(V4.surge));
+    assert_eq!(text(V6.loon), text(V6.surge));
 }
