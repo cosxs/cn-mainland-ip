@@ -39,12 +39,23 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit --quiet -m "chore(release): $version"
-          git pull --rebase --quiet origin main # main may have moved during the build
-          git push --quiet origin HEAD:main
+          # GitHub occasionally answers a push with a 500; main may also have moved during the build.
+          for attempt in 1 2 3 4; do
+            git pull --rebase --quiet origin main && git push --quiet origin HEAD:main && break
+            [ "$attempt" = 4 ] && exit 1
+            sleep $((attempt * 15))
+          done
 
           # Release assets are flat: surge/cn.list is attached as surge.list,
           # surge/cn-ipv4.list as surge-ipv4.list.
           mkdir ../assets
           for file in */cn*.*; do name=${file#*/}; cp "$file" "../assets/${file%%/*}${name#cn}"; done
-          gh release create "$version" ../assets/* --target "$(git rev-parse HEAD)" --title "$version" \
-            --notes "$(jq -r '"Snapshot \(.snapshot): \(.entries.v4) IPv4 and \(.entries.v6) IPv6 entries."' "$manifest")"
+          notes=$(jq -r '"Snapshot \(.snapshot): \(.entries.v4) IPv4 and \(.entries.v6) IPv6 entries."' "$manifest")
+          for attempt in 1 2 3; do
+            # A failed attempt may have left a release with missing assets behind.
+            [ "$attempt" = 1 ] || gh release delete "$version" --yes --cleanup-tag 2>/dev/null || true
+            gh release create "$version" ../assets/* --target "$(git rev-parse HEAD)" --title "$version" \
+              --notes "$notes" && break
+            [ "$attempt" = 3 ] && exit 1
+            sleep $((attempt * 15))
+          done
