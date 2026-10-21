@@ -8,7 +8,9 @@ use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 use anyhow::{Context, Result, bail};
+use cn_mainland_ip::Build;
 use cn_mainland_ip::fetch::{self, Fetcher};
+use cn_mainland_ip::params::{SNAPSHOT_FALLBACKS, SNAPSHOT_INTERVAL};
 use jiff::Timestamp;
 use tracing_subscriber::EnvFilter;
 
@@ -20,13 +22,11 @@ fn main() -> Result<()> {
         .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
         .init();
 
-    let snapshot = match env::var("CN_IP_AT") {
-        Ok(at) => fetch::check_snapshot(at.parse().context("CN_IP_AT")?)?,
-        Err(_) => fetch::latest_snapshot(Timestamp::now())?,
-    };
     let fetcher = Fetcher::new(env::var_os("CN_IP_CACHE").map(PathBuf::from));
-
-    let build = cn_mainland_ip::build(snapshot, &fetcher)?;
+    let build = match env::var("CN_IP_AT") {
+        Ok(at) => cn_mainland_ip::build(fetch::check_snapshot(at.parse().context("CN_IP_AT")?)?, &fetcher)?,
+        Err(_) => build_latest(&fetcher)?,
+    };
     write_files(Path::new(REPORT), &build.report.files)?;
     if !build.problems.is_empty() {
         bail!("not publishing:\n- {}", build.problems.join("\n- "));
@@ -38,6 +38,21 @@ fn main() -> Result<()> {
         "published to {RELEASE}/"
     );
     Ok(())
+}
+
+/// Builds the latest snapshot, or an earlier one when an archive never published one of its files.
+fn build_latest(fetcher: &Fetcher) -> Result<Build> {
+    let mut snapshot = fetch::latest_snapshot(Timestamp::now())?;
+    for _ in 0..SNAPSHOT_FALLBACKS {
+        match cn_mainland_ip::build(snapshot, fetcher) {
+            Err(e) if fetch::is_not_found(&e) => {
+                tracing::warn!(%snapshot, "incomplete, building the previous snapshot: {e:#}");
+                snapshot -= SNAPSHOT_INTERVAL;
+            }
+            result => return result,
+        }
+    }
+    cn_mainland_ip::build(snapshot, fetcher)
 }
 
 /// Writes each file next to its destination first and renames it into place.

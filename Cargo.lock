@@ -197,6 +197,7 @@ dependencies = [
  "jiff",
  "oneio",
  "rayon",
+ "reqwest",
  "ruzstd",
  "serde",
  "serde_json",

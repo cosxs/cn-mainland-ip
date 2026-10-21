@@ -8,6 +8,7 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, ensure};
 use jiff::{SignedDuration, Timestamp};
+use oneio::OneIoError;
 
 use crate::params::{
     Collector, DOWNLOAD_ATTEMPTS, NRO_ARCHIVE, Project, RETRY_DELAY, RIS_ARCHIVE, ROUTEVIEWS_ARCHIVE,
@@ -43,7 +44,8 @@ impl Fetcher {
     }
 }
 
-/// Runs `read` until it succeeds, at most `DOWNLOAD_ATTEMPTS` times. `read` must open `url` itself,
+/// Runs `read` until it succeeds or the file turns out to be missing, at most `DOWNLOAD_ATTEMPTS`
+/// times. `read` must open `url` itself,
 /// so that a stream that broke half way is downloaded again from the start.
 pub fn retry<T>(url: &str, read: impl FnMut() -> Result<T>) -> Result<T> {
     retry_after(RETRY_DELAY, url, read)
@@ -52,7 +54,7 @@ pub fn retry<T>(url: &str, read: impl FnMut() -> Result<T>) -> Result<T> {
 fn retry_after<T>(delay: Duration, url: &str, mut read: impl FnMut() -> Result<T>) -> Result<T> {
     for attempt in 1.. {
         match read() {
-            Err(e) if attempt < DOWNLOAD_ATTEMPTS => {
+            Err(e) if attempt < DOWNLOAD_ATTEMPTS && !is_not_found(&e) => {
                 tracing::warn!(url, attempt, "retrying: {e:#}");
                 thread::sleep(delay * attempt);
             }
@@ -60,6 +62,20 @@ fn retry_after<T>(delay: Duration, url: &str, mut read: impl FnMut() -> Result<T
         }
     }
     unreachable!("the last attempt returns")
+}
+
+/// Whether `error` comes from a 404: the archive has not published the file, and asking again
+/// will not help.
+pub fn is_not_found(error: &anyhow::Error) -> bool {
+    error.chain().any(|cause| {
+        let Some(OneIoError::Network(source) | OneIoError::NetworkWithContext { source, .. }) =
+            cause.downcast_ref::<OneIoError>()
+        else {
+            return false;
+        };
+        source.downcast_ref::<reqwest::Error>().and_then(reqwest::Error::status)
+            == Some(reqwest::StatusCode::NOT_FOUND)
+    })
 }
 
 fn utf8(path: &Path) -> Result<&str> {
@@ -147,6 +163,32 @@ mod tests {
             .is_err()
         );
         assert_eq!(calls, DOWNLOAD_ATTEMPTS);
+    }
+
+    /// Serves one HTTP response with `status` on localhost and returns its URL.
+    fn serve_once(status: &'static str) -> String {
+        use std::io::{BufRead as _, BufReader, Write as _};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let url = format!("http://{}/rib.gz", listener.local_addr().unwrap());
+        thread::spawn(move || {
+            let (stream, _) = listener.accept().unwrap();
+            let mut reader = BufReader::new(stream);
+            let mut line = String::new();
+            while reader.read_line(&mut line).unwrap() > 2 {
+                line.clear();
+            }
+            let response = format!("HTTP/1.1 {status}\r\ncontent-length: 0\r\nconnection: close\r\n\r\n");
+            reader.get_mut().write_all(response.as_bytes()).unwrap();
+        });
+        url
+    }
+
+    #[test]
+    fn missing_files_are_told_apart_from_other_failures() {
+        let open = |url: String| Fetcher::default().open(&url).map(drop).unwrap_err();
+        assert!(is_not_found(&open(serve_once("404 Not Found")).context("collector rrc25")));
+        assert!(!is_not_found(&open(serve_once("503 Service Unavailable"))));
+        assert!(!is_not_found(&anyhow::anyhow!("connection reset")));
     }
 
     #[test]

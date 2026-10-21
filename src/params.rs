@@ -63,6 +63,9 @@ pub const MAX_PREFIX_LEN: PerFamily<u8> = PerFamily { v4: 24, v6: 48 };
 pub const SNAPSHOT_INTERVAL: SignedDuration = SignedDuration::from_hours(8);
 /// Time for a snapshot to be completely published to every archive.
 pub const SNAPSHOT_DELAY: SignedDuration = SignedDuration::from_hours(2);
+/// A collector occasionally never publishes a dump. A scheduled build that finds a file missing
+/// then starts over from the previous snapshot, at most this many times.
+pub const SNAPSHOT_FALLBACKS: i32 = 2;
 
 /// Downloads are tried this many times, waiting `RETRY_DELAY` times the attempt number in between:
 /// archives occasionally drop a connection, and one missing collector blocks the whole release.
