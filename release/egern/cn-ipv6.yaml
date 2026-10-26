@@ -1,5 +1,5 @@
 # cn-mainland-ip: mainland China IP ranges derived from BGP routing data
-# snapshot 2026-10-25T08:00:00Z from 14 collectors; NRO 2026-10-24; RPKI 2026-10-24
+# snapshot 2026-10-26T08:00:00Z from 14 collectors; NRO 2026-10-25; RPKI 2026-10-25
 # 0 IPv4 and 3543 IPv6 entries; license MIT
 ip_cidr6_set:
   - '2001:250::/30'
