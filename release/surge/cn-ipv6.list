@@ -1,6 +1,6 @@
 # cn-mainland-ip: mainland China IP ranges derived from BGP routing data
-# snapshot 2026-10-26T08:00:00Z from 14 collectors; NRO 2026-10-25; RPKI 2026-10-25
-# 0 IPv4 and 3543 IPv6 entries; license MIT
+# snapshot 2026-10-27T08:00:00Z from 14 collectors; NRO 2026-10-26; RPKI 2026-10-26
+# 0 IPv4 and 3552 IPv6 entries; license MIT
 IP-CIDR6,2001:250::/30
 IP-CIDR6,2001:255::/32
 IP-CIDR6,2001:7fa:5::/48
@@ -3449,7 +3449,16 @@ IP-CIDR6,2a0a:d685:210::/44
 IP-CIDR6,2a0a:d685:220::/43
 IP-CIDR6,2a0a:d685:240::/42
 IP-CIDR6,2a0a:d685:280::/41
-IP-CIDR6,2a0a:d685:400::/38
+IP-CIDR6,2a0a:d685:400::/40
+IP-CIDR6,2a0a:d685:500::/45
+IP-CIDR6,2a0a:d685:508::/48
+IP-CIDR6,2a0a:d685:50a::/47
+IP-CIDR6,2a0a:d685:50c::/46
+IP-CIDR6,2a0a:d685:510::/44
+IP-CIDR6,2a0a:d685:520::/43
+IP-CIDR6,2a0a:d685:540::/42
+IP-CIDR6,2a0a:d685:580::/41
+IP-CIDR6,2a0a:d685:600::/39
 IP-CIDR6,2a0a:d685:800::/37
 IP-CIDR6,2a0a:d685:1000::/36
 IP-CIDR6,2a0a:d685:2000::/35
