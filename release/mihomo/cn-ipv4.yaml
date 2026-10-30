@@ -1,6 +1,6 @@
 # cn-mainland-ip: mainland China IP ranges derived from BGP routing data
-# snapshot 2026-10-29T08:00:00Z from 14 collectors; NRO 2026-10-28; RPKI 2026-10-28
-# 6237 IPv4 and 0 IPv6 entries; license MIT
+# snapshot 2026-10-30T08:00:00Z from 14 collectors; NRO 2026-10-29; RPKI 2026-10-29
+# 6239 IPv4 and 0 IPv6 entries; license MIT
 payload:
   - '1.0.1.0/24'
   - '1.0.2.0/23'
@@ -148,6 +148,7 @@ payload:
   - '27.54.72.0/21'
   - '27.54.152.0/21'
   - '27.54.192.0/18'
+  - '27.98.202.0/23'
   - '27.98.208.0/20'
   - '27.98.224.0/19'
   - '27.103.0.0/16'
@@ -1714,6 +1715,7 @@ payload:
   - '103.74.48.0/22'
   - '103.74.56.0/21'
   - '103.74.80.0/22'
+  - '103.74.124.0/24'
   - '103.74.126.0/23'
   - '103.74.148.0/22'
   - '103.74.152.0/21'
