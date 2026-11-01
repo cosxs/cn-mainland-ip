@@ -1,6 +1,6 @@
 # cn-mainland-ip: mainland China IP ranges derived from BGP routing data
-# snapshot 2026-10-31T00:00:00Z from 14 collectors; NRO 2026-10-30; RPKI 2026-10-30
-# 0 IPv4 and 3573 IPv6 entries; license MIT
+# snapshot 2026-11-01T08:00:00Z from 14 collectors; NRO 2026-10-31; RPKI 2026-10-31
+# 0 IPv4 and 3576 IPv6 entries; license MIT
 ip_cidr6_set:
   - '2001:250::/30'
   - '2001:255::/32'
@@ -1027,6 +1027,7 @@ ip_cidr6_set:
   - '2402:7da0::/32'
   - '2402:7e20::/32'
   - '2402:7ee0::/32'
+  - '2402:8160::/32'
   - '2402:8180::/32'
   - '2402:8300::/32'
   - '2402:8380::/32'
@@ -3472,7 +3473,9 @@ ip_cidr6_set:
   - '2a0a:d685:240::/42'
   - '2a0a:d685:280::/41'
   - '2a0a:d685:400::/40'
-  - '2a0a:d685:500::/45'
+  - '2a0a:d685:500::/46'
+  - '2a0a:d685:504::/48'
+  - '2a0a:d685:506::/47'
   - '2a0a:d685:508::/48'
   - '2a0a:d685:50a::/47'
   - '2a0a:d685:50c::/46'
