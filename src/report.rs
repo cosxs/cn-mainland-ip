@@ -47,6 +47,8 @@ impl AsnNames {
 pub struct Manifest {
     pub snapshot: Timestamp,
     pub collectors: Vec<Source>,
+    /// Collectors that published no RIB for the snapshot, with the older one used instead.
+    pub stale_collectors: Vec<StaleCollector>,
     pub nro: Source,
     pub nro_records: usize,
     pub rpki: Vec<Source>,
@@ -60,8 +62,10 @@ pub struct Manifest {
 }
 
 impl Manifest {
+    /// `ribs` holds when each collector's RIB was taken, in `COLLECTORS` order.
     pub fn new(
         inputs: &Inputs,
+        ribs: &[Timestamp],
         observations: &Observations,
         classification: &Classification,
         artifacts: &Artifacts,
@@ -71,7 +75,17 @@ impl Manifest {
         let source = |name: &str, url: String| Source { name: name.to_owned(), url };
         Self {
             snapshot,
-            collectors: COLLECTORS.iter().map(|c| source(c.name, fetch::rib_url(c, snapshot))).collect(),
+            collectors: COLLECTORS
+                .iter()
+                .zip(ribs)
+                .map(|(c, &at)| source(c.name, fetch::rib_url(c, at)))
+                .collect(),
+            stale_collectors: COLLECTORS
+                .iter()
+                .zip(ribs)
+                .filter(|&(_, &at)| at != snapshot)
+                .map(|(c, &at)| StaleCollector { name: c.name.to_owned(), rib: at })
+                .collect(),
             nro: source("nro", fetch::nro_url(snapshot)),
             nro_records: inputs.registry.records,
             rpki: fetch::rpki_urls(snapshot).into_iter().map(|(tal, url)| source(tal, url)).collect(),
@@ -84,6 +98,12 @@ impl Manifest {
             problems: problems.to_vec(),
         }
     }
+}
+
+#[derive(Debug, Serialize)]
+pub struct StaleCollector {
+    pub name: String,
+    pub rib: Timestamp,
 }
 
 #[derive(Debug, Serialize)]

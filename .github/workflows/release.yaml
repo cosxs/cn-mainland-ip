@@ -50,7 +50,8 @@ jobs:
           # surge/cn-ipv4.list as surge-ipv4.list.
           mkdir ../assets
           for file in */cn*.*; do name=${file#*/}; cp "$file" "../assets/${file%%/*}${name#cn}"; done
-          notes=$(jq -r '"Snapshot \(.snapshot): \(.entries.v4) IPv4 and \(.entries.v6) IPv6 entries."' "$manifest")
+          notes=$(jq -r '"Snapshot \(.snapshot): \(.entries.v4) IPv4 and \(.entries.v6) IPv6 entries."
+            + (.stale_collectors | map(" \(.name) published no RIB for it; its RIB of \(.rib) was used.") | add // "")' "$manifest")
           for attempt in 1 2 3; do
             # A failed attempt may have left a release with missing assets behind.
             [ "$attempt" = 1 ] || gh release delete "$version" --yes --cleanup-tag 2>/dev/null || true

@@ -66,6 +66,9 @@ pub const SNAPSHOT_DELAY: SignedDuration = SignedDuration::from_hours(2);
 /// A collector occasionally never publishes a dump. A scheduled build that finds a file missing
 /// then starts over from the previous snapshot, at most this many times.
 pub const SNAPSHOT_FALLBACKS: i32 = 2;
+/// A collector can also stop publishing for days. Its newest RIB up to this much older than the
+/// snapshot then stands in, which keeps the paths only it sees; routing changes little in a week.
+pub const MAX_RIB_AGE: SignedDuration = SignedDuration::from_hours(7 * 24);
 
 /// Downloads are tried this many times, waiting `RETRY_DELAY` times the attempt number in between:
 /// archives occasionally drop a connection, and one missing collector blocks the whole release.
