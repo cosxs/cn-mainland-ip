@@ -77,11 +77,19 @@ pub struct Build {
 pub fn build(snapshot: Timestamp, fetcher: &Fetcher) -> Result<Build> {
     let inputs = Inputs::fetch(snapshot, fetcher)?;
     // Every collector must succeed: a missing one could hide domestic paths only it sees.
-    let observations = COLLECTORS
+    // Merged as they come, so that no more than a few RIBs are held at once.
+    let (mut ribs, observations) = COLLECTORS
         .par_iter()
         .enumerate()
-        .map(|(index, collector)| observe(index, collector, &inputs, fetcher))
-        .try_reduce(Observations::default, |a, b| Ok(a.merge(b)))?;
+        .map(|(index, collector)| {
+            observe(index, collector, &inputs, fetcher).map(|(at, o)| (vec![(index, at)], o))
+        })
+        .try_reduce(Default::default, |(mut a_ribs, a), (b_ribs, b)| {
+            a_ribs.extend(b_ribs);
+            Ok((a_ribs, a.merge(b)))
+        })?;
+    ribs.sort_unstable();
+    let ribs: Vec<Timestamp> = ribs.into_iter().map(|(_, at)| at).collect();
 
     let classification = classify::run(&observations, &inputs.registry, &inputs.roas);
     let header = Header {
@@ -92,17 +100,38 @@ pub fn build(snapshot: Timestamp, fetcher: &Fetcher) -> Result<Build> {
     };
     let artifacts = export::render(&classification.included, &header)?;
     let problems = guard::check(&inputs, &classification, &artifacts);
-    let manifest = Manifest::new(&inputs, &observations, &classification, &artifacts, &problems);
+    let manifest = Manifest::new(&inputs, &ribs, &observations, &classification, &artifacts, &problems);
     let report = report::render(&manifest, &classification, &inputs.names)?;
     Ok(Build { artifacts, report, problems })
 }
 
-fn observe(index: usize, collector: &Collector, inputs: &Inputs, fetcher: &Fetcher) -> Result<Observations> {
-    let url = fetch::rib_url(collector, inputs.snapshot);
+/// Parses the collector's RIB at the snapshot, or its newest one within `MAX_RIB_AGE` before it when
+/// the collector published none, and returns when that RIB was taken.
+fn observe(
+    index: usize,
+    collector: &Collector,
+    inputs: &Inputs,
+    fetcher: &Fetcher,
+) -> Result<(Timestamp, Observations)> {
     let started = Instant::now();
-    let observations = fetch::retry(&url, || rib::observe(fetcher.open(&url)?, index, &inputs.registry))
-        .with_context(|| format!("collector {}", collector.name))?;
+    let mut at = inputs.snapshot;
+    let observations = loop {
+        let url = fetch::rib_url(collector, at);
+        let result = fetch::retry(&url, || rib::observe(fetcher.open(&url)?, index, &inputs.registry));
+        match result
+            .as_ref()
+            .err()
+            .filter(|e| fetch::is_not_found(e))
+            .and(fetch::earlier_rib(inputs.snapshot, at))
+        {
+            Some(earlier) => {
+                warn!(collector = collector.name, %at, "no RIB, trying the one before");
+                at = earlier;
+            }
+            None => break result.with_context(|| format!("collector {}", collector.name))?,
+        }
+    };
     let secs = started.elapsed().as_secs();
-    info!(collector = collector.name, routes = observations.routes.len(), secs, "RIB parsed");
-    Ok(observations)
+    info!(collector = collector.name, %at, routes = observations.routes.len(), secs, "RIB parsed");
+    Ok((at, observations))
 }

@@ -11,8 +11,8 @@ use jiff::{SignedDuration, Timestamp};
 use oneio::OneIoError;
 
 use crate::params::{
-    Collector, DOWNLOAD_ATTEMPTS, NRO_ARCHIVE, Project, RETRY_DELAY, RIS_ARCHIVE, ROUTEVIEWS_ARCHIVE,
-    RPKI_ARCHIVE, RPKI_TALS, SNAPSHOT_DELAY, SNAPSHOT_INTERVAL,
+    Collector, DOWNLOAD_ATTEMPTS, MAX_RIB_AGE, NRO_ARCHIVE, Project, RETRY_DELAY, RIS_ARCHIVE,
+    ROUTEVIEWS_ARCHIVE, RPKI_ARCHIVE, RPKI_TALS, SNAPSHOT_DELAY, SNAPSHOT_INTERVAL,
 };
 
 /// Opens URLs, decompressing by file extension.
@@ -86,6 +86,13 @@ fn utf8(path: &Path) -> Result<&str> {
 pub fn latest_snapshot(now: Timestamp) -> Result<Timestamp> {
     let ready = (now - SNAPSHOT_DELAY).as_second();
     Ok(Timestamp::from_second(ready - ready.rem_euclid(SNAPSHOT_INTERVAL.as_secs()))?)
+}
+
+/// The RIB to try when a collector published none at `at`: the one before it, unless that is more
+/// than `MAX_RIB_AGE` older than `snapshot`.
+pub fn earlier_rib(snapshot: Timestamp, at: Timestamp) -> Option<Timestamp> {
+    let earlier = at - SNAPSHOT_INTERVAL;
+    (snapshot.duration_since(earlier) <= MAX_RIB_AGE).then_some(earlier)
 }
 
 /// A requested snapshot must be on the RIS schedule (00:00, 08:00, 16:00 UTC).
@@ -189,6 +196,14 @@ mod tests {
         assert!(is_not_found(&open(serve_once("404 Not Found")).context("collector rrc25")));
         assert!(!is_not_found(&open(serve_once("503 Service Unavailable"))));
         assert!(!is_not_found(&anyhow::anyhow!("connection reset")));
+    }
+
+    #[test]
+    fn earlier_ribs_go_back_a_week_at_most() {
+        let snapshot = at("2026-11-09T16:00Z");
+        assert_eq!(earlier_rib(snapshot, snapshot), Some(at("2026-11-09T08:00Z")));
+        assert_eq!(earlier_rib(snapshot, at("2026-11-03T00:00Z")), Some(at("2026-11-02T16:00Z")));
+        assert_eq!(earlier_rib(snapshot, at("2026-11-02T16:00Z")), None);
     }
 
     #[test]
