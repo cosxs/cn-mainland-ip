@@ -107,6 +107,8 @@ rules:
 
 大陆直连 `raw.githubusercontent.com` 可能不稳定。Surge 首次下载失败时可以先通过代理下载一次；mihomo 可以在 provider 里加 `proxy: <代理组>`；sing-box 可以用 `download_detour`（1.14 起改为 `http_client`）指定经代理下载。
 
+也可以改用 jsDelivr 镜像：把地址里的 `https://raw.githubusercontent.com/cosxs/cn-mainland-ip/main/` 换成 `https://cdn.jsdelivr.net/gh/cosxs/cn-mainland-ip@main/`，例如 `https://cdn.jsdelivr.net/gh/cosxs/cn-mainland-ip@main/release/surge/cn.list`。jsDelivr 会缓存最多约 12 小时，所以更新会比 GitHub 晚一些；它在大陆的可用性也不稳定，只适合当备用地址。
+
 ## 判定方法
 
 一段地址被收录，只有两种情况：
