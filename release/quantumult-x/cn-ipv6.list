@@ -1,6 +1,6 @@
 # cn-mainland-ip: mainland China IP ranges derived from BGP routing data
-# snapshot 2026-11-14T00:00:00Z from 14 collectors; NRO 2026-11-13; RPKI 2026-11-13
-# 0 IPv4 and 3541 IPv6 entries; license MIT
+# snapshot 2026-11-17T00:00:00Z from 13 collectors; NRO 2026-11-16; RPKI 2026-11-16
+# 0 IPv4 and 3531 IPv6 entries; license MIT
 ip6-cidr, 2001:250::/30, direct
 ip6-cidr, 2001:255::/32, direct
 ip6-cidr, 2001:7fa:5::/48, direct
@@ -694,24 +694,7 @@ ip6-cidr, 2401:b180::/32, direct
 ip6-cidr, 2401:b220::/32, direct
 ip6-cidr, 2401:b340::/32, direct
 ip6-cidr, 2401:b360::/32, direct
-ip6-cidr, 2401:b400::/45, direct
-ip6-cidr, 2401:b400:a::/47, direct
-ip6-cidr, 2401:b400:c::/46, direct
-ip6-cidr, 2401:b400:10::/48, direct
-ip6-cidr, 2401:b400:12::/47, direct
-ip6-cidr, 2401:b400:14::/46, direct
-ip6-cidr, 2401:b400:18::/45, direct
-ip6-cidr, 2401:b400:20::/43, direct
-ip6-cidr, 2401:b400:40::/42, direct
-ip6-cidr, 2401:b400:80::/41, direct
-ip6-cidr, 2401:b400:100::/40, direct
-ip6-cidr, 2401:b400:200::/39, direct
-ip6-cidr, 2401:b400:400::/38, direct
-ip6-cidr, 2401:b400:800::/37, direct
-ip6-cidr, 2401:b400:1000::/36, direct
-ip6-cidr, 2401:b400:2000::/35, direct
-ip6-cidr, 2401:b400:4000::/34, direct
-ip6-cidr, 2401:b400:8000::/33, direct
+ip6-cidr, 2401:b400::/32, direct
 ip6-cidr, 2401:b4c0::/32, direct
 ip6-cidr, 2401:b4e0::/32, direct
 ip6-cidr, 2401:b540::/32, direct
@@ -1011,7 +994,12 @@ ip6-cidr, 2402:8260:b00::/40, direct
 ip6-cidr, 2402:8260:c00::/38, direct
 ip6-cidr, 2402:8260:1000::/36, direct
 ip6-cidr, 2402:8260:2000::/35, direct
-ip6-cidr, 2402:8260:4000::/34, direct
+ip6-cidr, 2402:8260:4000::/37, direct
+ip6-cidr, 2402:8260:4800::/38, direct
+ip6-cidr, 2402:8260:4d00::/40, direct
+ip6-cidr, 2402:8260:4e00::/39, direct
+ip6-cidr, 2402:8260:5000::/36, direct
+ip6-cidr, 2402:8260:6000::/35, direct
 ip6-cidr, 2402:8260:8000::/33, direct
 ip6-cidr, 2402:8300::/32, direct
 ip6-cidr, 2402:8380::/32, direct
@@ -2402,7 +2390,9 @@ ip6-cidr, 2406:840:e0ce::/48, direct
 ip6-cidr, 2406:840:e0d0::/44, direct
 ip6-cidr, 2406:840:e0e4::/48, direct
 ip6-cidr, 2406:840:e0e6::/47, direct
-ip6-cidr, 2406:840:e0e8::/45, direct
+ip6-cidr, 2406:840:e0e9::/48, direct
+ip6-cidr, 2406:840:e0ea::/47, direct
+ip6-cidr, 2406:840:e0ec::/46, direct
 ip6-cidr, 2406:840:e0f0::/44, direct
 ip6-cidr, 2406:840:e100::/45, direct
 ip6-cidr, 2406:840:e108::/46, direct
@@ -3447,7 +3437,7 @@ ip6-cidr, 2a0a:d685:53c::/48, direct
 ip6-cidr, 2a0a:d685:53e::/47, direct
 ip6-cidr, 2a0a:d685:540::/42, direct
 ip6-cidr, 2a0a:d685:580::/41, direct
-ip6-cidr, 2a0a:d685:600::/39, direct
+ip6-cidr, 2a0a:d685:700::/40, direct
 ip6-cidr, 2a0a:d685:800::/37, direct
 ip6-cidr, 2a0a:d685:1000::/36, direct
 ip6-cidr, 2a0a:d685:2000::/35, direct
