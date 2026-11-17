@@ -21,7 +21,7 @@ pub mod rpki;
 use std::io::BufReader;
 use std::time::Instant;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use jiff::Timestamp;
 use rayon::prelude::*;
 use tracing::{info, warn};
@@ -29,7 +29,7 @@ use tracing::{info, warn};
 use crate::export::{Artifacts, Header};
 use crate::fetch::Fetcher;
 use crate::nro::Registry;
-use crate::params::{ASN_NAMES_URL, COLLECTORS, Collector};
+use crate::params::{ASN_NAMES_URL, COLLECTORS, Collector, MAX_RIB_AGE, MAX_SKIPPED_COLLECTORS};
 use crate::report::{AsnNames, Manifest, Report};
 use crate::rib::Observations;
 use crate::rpki::{Dump, Roas};
@@ -76,25 +76,34 @@ pub struct Build {
 
 pub fn build(snapshot: Timestamp, fetcher: &Fetcher) -> Result<Build> {
     let inputs = Inputs::fetch(snapshot, fetcher)?;
-    // Every collector must succeed: a missing one could hide domestic paths only it sees.
+    // A missing collector could hide domestic paths only it sees, so at most
+    // `MAX_SKIPPED_COLLECTORS` may be left out, and only after `MAX_RIB_AGE` without a RIB.
     // Merged as they come, so that no more than a few RIBs are held at once.
     let (mut ribs, observations) = COLLECTORS
         .par_iter()
         .enumerate()
         .map(|(index, collector)| {
-            observe(index, collector, &inputs, fetcher).map(|(at, o)| (vec![(index, at)], o))
+            anyhow::Ok(match observe(index, collector, &inputs, fetcher)? {
+                Some((at, observations)) => (vec![(index, Some(at))], observations),
+                None => (vec![(index, None)], Observations::default()),
+            })
         })
         .try_reduce(Default::default, |(mut a_ribs, a), (b_ribs, b)| {
             a_ribs.extend(b_ribs);
             Ok((a_ribs, a.merge(b)))
         })?;
     ribs.sort_unstable();
-    let ribs: Vec<Timestamp> = ribs.into_iter().map(|(_, at)| at).collect();
+    let ribs: Vec<Option<Timestamp>> = ribs.into_iter().map(|(_, at)| at).collect();
+    let skipped: Vec<&str> =
+        COLLECTORS.iter().zip(&ribs).filter(|(_, at)| at.is_none()).map(|(c, _)| c.name).collect();
+    if skipped.len() > MAX_SKIPPED_COLLECTORS {
+        bail!("no RIB within {MAX_RIB_AGE:#} from {}", skipped.join(", "));
+    }
 
     let classification = classify::run(&observations, &inputs.registry, &inputs.roas);
     let header = Header {
         snapshot,
-        collectors: COLLECTORS.len(),
+        collectors: COLLECTORS.len() - skipped.len(),
         nro: inputs.registry.published,
         rpki: inputs.roas.generated,
     };
@@ -106,32 +115,31 @@ pub fn build(snapshot: Timestamp, fetcher: &Fetcher) -> Result<Build> {
 }
 
 /// Parses the collector's RIB at the snapshot, or its newest one within `MAX_RIB_AGE` before it when
-/// the collector published none, and returns when that RIB was taken.
+/// the collector published none, and returns when that RIB was taken; `None` when there is none.
 fn observe(
     index: usize,
     collector: &Collector,
     inputs: &Inputs,
     fetcher: &Fetcher,
-) -> Result<(Timestamp, Observations)> {
+) -> Result<Option<(Timestamp, Observations)>> {
     let started = Instant::now();
     let mut at = inputs.snapshot;
     let observations = loop {
         let url = fetch::rib_url(collector, at);
         let result = fetch::retry(&url, || rib::observe(fetcher.open(&url)?, index, &inputs.registry));
-        match result
-            .as_ref()
-            .err()
-            .filter(|e| fetch::is_not_found(e))
-            .and(fetch::earlier_rib(inputs.snapshot, at))
-        {
-            Some(earlier) => {
+        match &result {
+            Err(e) if fetch::is_not_found(e) => {
+                let Some(earlier) = fetch::earlier_rib(inputs.snapshot, at) else {
+                    warn!(collector = collector.name, max_age = %MAX_RIB_AGE, "no RIB, leaving the collector out");
+                    return Ok(None);
+                };
                 warn!(collector = collector.name, %at, "no RIB, trying the one before");
                 at = earlier;
             }
-            None => break result.with_context(|| format!("collector {}", collector.name))?,
+            _ => break result.with_context(|| format!("collector {}", collector.name))?,
         }
     };
     let secs = started.elapsed().as_secs();
     info!(collector = collector.name, %at, routes = observations.routes.len(), secs, "RIB parsed");
-    Ok((at, observations))
+    Ok(Some((at, observations)))
 }

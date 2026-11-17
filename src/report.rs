@@ -49,6 +49,8 @@ pub struct Manifest {
     pub collectors: Vec<Source>,
     /// Collectors that published no RIB for the snapshot, with the older one used instead.
     pub stale_collectors: Vec<StaleCollector>,
+    /// Collectors left out for want of any RIB within `MAX_RIB_AGE`.
+    pub skipped_collectors: Vec<String>,
     pub nro: Source,
     pub nro_records: usize,
     pub rpki: Vec<Source>,
@@ -62,10 +64,10 @@ pub struct Manifest {
 }
 
 impl Manifest {
-    /// `ribs` holds when each collector's RIB was taken, in `COLLECTORS` order.
+    /// `ribs` holds when each collector's RIB was taken, in `COLLECTORS` order; `None` if left out.
     pub fn new(
         inputs: &Inputs,
-        ribs: &[Timestamp],
+        ribs: &[Option<Timestamp>],
         observations: &Observations,
         classification: &Classification,
         artifacts: &Artifacts,
@@ -78,13 +80,20 @@ impl Manifest {
             collectors: COLLECTORS
                 .iter()
                 .zip(ribs)
-                .map(|(c, &at)| source(c.name, fetch::rib_url(c, at)))
+                .filter_map(|(c, at)| at.map(|at| source(c.name, fetch::rib_url(c, at))))
                 .collect(),
             stale_collectors: COLLECTORS
                 .iter()
                 .zip(ribs)
-                .filter(|&(_, &at)| at != snapshot)
-                .map(|(c, &at)| StaleCollector { name: c.name.to_owned(), rib: at })
+                .filter_map(|(c, at)| {
+                    at.filter(|&at| at != snapshot).map(|rib| StaleCollector { name: c.name.to_owned(), rib })
+                })
+                .collect(),
+            skipped_collectors: COLLECTORS
+                .iter()
+                .zip(ribs)
+                .filter(|(_, at)| at.is_none())
+                .map(|(c, _)| c.name.to_owned())
                 .collect(),
             nro: source("nro", fetch::nro_url(snapshot)),
             nro_records: inputs.registry.records,
